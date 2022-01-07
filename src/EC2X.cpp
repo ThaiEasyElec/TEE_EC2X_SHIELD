@@ -1,8 +1,10 @@
 #include "EC2X.h"
 
-extern unsigned int __bss_end;
-extern unsigned int __heap_start;
-extern void *__brkval;
+#ifdef __arm__
+extern "C" char* sbrk(int incr);
+#else  // __ARM__
+extern char *__brkval;
+#endif  // __arm__
 
 EC2X lte;
 
@@ -484,11 +486,14 @@ bool EC2X::ussd(char *str_ussd)
 }
 int EC2X::ramAvailable()
 {
-	uint8_t newVariable;
-	if ((uint16_t)__brkval == 0)
-		return (((uint16_t)&newVariable) - ((uint16_t)&__bss_end));
-	else
-		return (((uint16_t)&newVariable) - ((uint16_t)__brkval));
+char top;
+#ifdef __arm__
+  return &top - reinterpret_cast<char*>(sbrk(0));
+#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
+  return &top - __brkval;
+#else  // __arm__
+  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
+#endif  // __arm__
 }
 
 
