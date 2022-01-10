@@ -328,7 +328,124 @@ String EC2X::setNTP(char *server,int port)
 	ser.flushSerial();
 	return data;
 }
-
+bool EC2X::ping(String server , Stream *ser_)
+{
+	lte.ser.flushSerial();
+	lte.ser.print(F("AT+QPING=1,\""));
+	lte.ser.print(server);
+	lte.ser.print(F("\"\r"));
+	uint8_t  res = lte.ser.waitData(WAIT_OK,5000);
+	if(res==RES_OK)
+	{
+		unsigned long pv = millis();	
+		unsigned long tout = 2000;
+		do
+		{
+			while(lte.ser.available())
+			{
+				ser_->write(lte.ser.read());
+				pv = millis(); 
+				tout = 200;
+			}
+		}
+		while(millis()-pv<tout);
+		lte.ser.flushSerial();
+		return true;
+	}
+	lte.ser.flushSerial();
+	return false;
+}
+String EC2X::ping(String server)
+{
+	String ret="";
+	lte.ser.flushSerial();
+	lte.ser.print(F("AT+QPING=1,\""));
+	lte.ser.print(server);
+	lte.ser.print(F("\"\r"));
+	uint8_t  res = lte.ser.waitData(WAIT_OK,5000);
+	if(res==RES_OK)
+	{
+		unsigned long pv = millis();	
+		unsigned long tout = 2000;
+		do
+		{
+			while(lte.ser.available())
+			{
+				ret += lte.ser.readString();
+				pv = millis(); 
+				tout = 200;
+			}
+		}
+		while(millis()-pv<tout);
+	}
+	lte.ser.flushSerial();
+	return ret;
+}
+bool EC2X::setDNS(String pridnsaddr)
+{
+	lte.ser.flushSerial();
+	lte.ser.print(F("AT+QIDNSCFG=1"));
+	lte.ser.print(F(",\""));
+	lte.ser.print(pridnsaddr);
+	lte.ser.print(F("\"\r"));
+	uint8_t  res = lte.ser.waitData(WAIT_OK,5000);
+	if(res==RES_OK)
+	{
+		return true;
+	}
+	
+	return false;
+}
+String EC2X::getIPbyDomain(String domain)
+{
+	String ret="";
+	lte.ser.flushSerial();
+	lte.ser.print(F("AT+QIDNSGIP=1,\""));
+	lte.ser.print(domain);
+	lte.ser.print(F("\"\r"));
+	uint8_t  res = lte.ser.waitData(WAIT_OK,5000);
+	if(res==RES_OK)
+	{
+		unsigned long pv = millis();	
+		unsigned long tout = 10000;
+		bool flag = false;
+		uint8_t cntx = 0;
+		do
+		{
+			while(lte.ser.available())
+			{
+				int c = lte.ser.read();
+			
+				if(flag)
+				{
+					ret +=  char(c);
+				}
+				if(char(c) == '\"' )
+				{
+					cntx++;
+					if(cntx==5)
+						flag = true;
+					else
+					{
+						if(flag==true)
+						{
+							if(ret.length()>0)
+								ret.remove(ret.length()-1);	
+						}
+						flag = false;
+					}
+				}
+				pv = millis(); 
+				tout = 500;
+			}
+		}
+		while(millis()-pv<tout);
+		
+	}
+	ser.flushSerial();
+	return ret;
+	
+}
 bool EC2X::call(char *number)
 {
 	lte.ser.print(F("ATD"));

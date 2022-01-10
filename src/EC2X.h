@@ -73,6 +73,10 @@ class EC2X
 	bool internetStatus();
 	String getTime();
 	String setNTP(char *server,int port=123);
+	bool ping(String server , Stream *ser_);
+	String ping(String server);
+	bool setDNS(String pridnsaddr);
+	String getIPbyDomain(String domain);
 	
 	bool call(char *number);
 	bool disconnect();
