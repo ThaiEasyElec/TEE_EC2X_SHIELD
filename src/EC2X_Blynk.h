@@ -32,8 +32,19 @@ public:
 	}
 	int connect() 
 	{
-		BLYNK_LOG1(BLYNK_F("Connect"));
-		return blynkClient->open(host,port,0);
+		if(lte.internetStatus())
+		{
+			BLYNK_LOG1(BLYNK_F("Connect"));
+			return blynkClient->open(host,port,0);
+		}
+		else
+		{
+			if(lte.connectInternet())
+			{
+				return blynkClient->open(host,port,0);
+			}
+		}
+		return false;
 	}
 	void begin(const char* h, int p) 
 	{
@@ -58,9 +69,9 @@ public:
 			Serial.print(" ");
 		}
 		*/
-		Serial.println("000");
-		Serial.write((uint8_t*)buf,len);
-		Serial.println("111");
+		//Serial.println("000");
+		//Serial.write((uint8_t*)buf,len);
+		//Serial.println("111");
 		return blynkClient->send((uint8_t*)buf,len);
     }
 	bool connected() 
