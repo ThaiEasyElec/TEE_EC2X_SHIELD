@@ -246,7 +246,7 @@ int EC2X_HTTP::request_ram(String method,String url,uint8_t *data,size_t length)
 {
 	requestheader(true);
 	Serial.print("!!Freemem: ");
-	Serial.println(freeMemory());
+	//Serial.println(freeMemory());
 	int index = url.indexOf(':');
 	int index2 = url.indexOf('/',index+3);
 	String server = url.substring(0,index2);
@@ -287,10 +287,10 @@ int EC2X_HTTP::request_ram(String method,String url,uint8_t *data,size_t length)
 		httpData += F("\r\n");
 	Serial.println(httpData.length());
 	size_t size = length+httpData.length();
-	
+	/*
 	Serial.print("Freemem: ");
 	Serial.println(freeMemory());
-
+        */
 
 	if(startPost(size,80,80))
 	{
