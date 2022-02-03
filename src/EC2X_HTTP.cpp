@@ -1,6 +1,6 @@
 #include "EC2X_HTTP.h"
 
-#include <MemoryFree.h>;
+//#include <MemoryFree.h>;
 
 EC2X_HTTP::EC2X_HTTP(uint8_t connectID)
 {
